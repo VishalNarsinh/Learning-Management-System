@@ -13,7 +13,7 @@ public interface CourseService {
 
     void deleteCourse(long courseId);
 
-    CourseDto updateCourse(CourseDto courseDto,long courseId, MultipartFile file);
+    CourseDto updateCourse(CourseDto courseDto,long courseId, MultipartFile file,String instructorEmail) throws IOException;
 
     List<CourseDto> findCourseBySubCategoryId(Long subCategoryId);
 

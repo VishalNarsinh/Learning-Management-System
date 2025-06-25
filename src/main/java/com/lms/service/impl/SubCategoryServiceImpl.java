@@ -1,9 +1,9 @@
 package com.lms.service.impl;
 
-import com.lms.dto.CategoryDto;
 import com.lms.dto.SubCategoryDto;
 import com.lms.exception.ResourceNotFoundException;
 import com.lms.mapper.CategoryMapper;
+import com.lms.model.Category;
 import com.lms.model.SubCategory;
 import com.lms.repository.CategoryRepository;
 import com.lms.repository.SubCategoryRepository;
@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -45,11 +46,12 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     }
 
     @Override
+    @Transactional
     public SubCategoryDto updateSubCategory(SubCategoryDto subCategoryDto,long subCategoryId) {
         SubCategory subCategoryDB = subCategoryRepository.findById(subCategoryId).orElseThrow(() -> new ResourceNotFoundException("SubCategory", "subCategoryId", subCategoryId));
-        CategoryDto categoryById = categoryService.findCategoryByCategoryId(subCategoryDto.getCategoryId());
+        Category category = categoryRepository.findById(subCategoryDto.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", subCategoryDto.getCategoryId()));
         subCategoryDB.setName(subCategoryDto.getName());
-        subCategoryDB.setCategory(categoryMapper.toEntity(categoryById));
+        subCategoryDB.setCategory(category);
         return categoryMapper.toDto(subCategoryRepository.save(subCategoryDB));
     }
 

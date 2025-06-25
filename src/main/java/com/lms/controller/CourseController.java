@@ -3,6 +3,7 @@ package com.lms.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lms.dto.CourseDto;
 import com.lms.dto.CustomMessage;
+import com.lms.exception.ApiException;
 import com.lms.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -52,8 +53,12 @@ public class CourseController {
     }
 
     @PutMapping(value = "/{courseId}",consumes = {"multipart/form-data"})
-    public ResponseEntity<?> updateCourse(@PathVariable long courseId, @RequestPart("course")CourseDto courseDto,@RequestPart("file") MultipartFile file) {
-        return ResponseEntity.ok(courseService.updateCourse(courseDto, courseId, file));
+    public ResponseEntity<?> updateCourse(@PathVariable long courseId, @RequestPart("course")CourseDto courseDto,@RequestPart("file") MultipartFile file,Principal principal) {
+        try {
+            return ResponseEntity.ok(courseService.updateCourse(courseDto, courseId, file, principal.getName()));
+        } catch (IOException e) {
+            throw new ApiException("Error while processing course image"+e.getMessage());
+        }
     }
 
     @DeleteMapping("/{courseId}")

@@ -62,9 +62,22 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDto updateCourse(CourseDto courseDto,long courseId,MultipartFile file) {
-
-        return null;
+    public CourseDto updateCourse(CourseDto courseDto,long courseId,MultipartFile file,String instructorEmail) throws IOException {
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", "id", courseId));
+        if(!course.getInstructor().getEmail().equals(instructorEmail)){
+            throw new AccessDeniedException("You are not allowed to update this course");
+        }
+        if(file != null && !file.isEmpty()) {
+            if(course.getImage() != null){
+                imageService.deleteImage(course.getImage().getImageId());
+                Image image = imageService.uploadImage(file, AppConstants.COURSE_IMAGE_FOLDER);
+                course.setImage(image);
+            }
+        }
+        course.setCourseName(courseDto.getCourseName());
+        course.setCourseDescription(courseDto.getCourseDescription());
+        course.setSubCategory(subCategoryRepository.findById(courseDto.getSubCategoryId()).orElseThrow(() -> new ResourceNotFoundException("SubCategory", "id", courseDto.getSubCategoryId())));
+        return courseMapper.toDto(courseRepository.save(course));
     }
 
     @Override
