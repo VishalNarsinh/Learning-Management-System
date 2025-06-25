@@ -31,8 +31,8 @@ public class UserController {
         return ResponseEntity.ok(myUserDetailsService.findUserByRole(Role.ROLE_INSTRUCTOR));
     }
 
-    @PatchMapping("/toggle-status/{userId}")
-    public ResponseEntity<?> disableUser(@PathVariable Long userId) {
+    @PatchMapping("/{userId}/toggle-status")
+    public ResponseEntity<?> toggleUser(@PathVariable Long userId) {
         return ResponseEntity.ok(myUserDetailsService.toggleUser(userId));
     }
 

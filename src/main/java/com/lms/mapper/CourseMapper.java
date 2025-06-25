@@ -48,6 +48,7 @@ public class CourseMapper {
         CourseDto dto = new CourseDto();
         dto.setCourseId(course.getCourseId());
         dto.setCourseName(course.getCourseName());
+        dto.setEnabled(course.isEnabled());
         dto.setCourseDescription(course.getCourseDescription());
         dto.setImage(course.getImage()); // No mapping needed
         dto.setSubCategoryId(course.getSubCategory() != null ? course.getSubCategory().getSubCategoryId() : null);

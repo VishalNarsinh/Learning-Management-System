@@ -12,6 +12,7 @@ public class CourseDto {
     private Long courseId;
     private String courseName;
     private String courseDescription;
+    private boolean enabled;
     private Image image;
     private Long subCategoryId;
 //    private List<LessonDto> lessons = new ArrayList<>();

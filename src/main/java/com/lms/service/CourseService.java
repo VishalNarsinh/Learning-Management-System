@@ -20,4 +20,10 @@ public interface CourseService {
     CourseDto findCourseByCourseId(long courseId);
 
     List<CourseDto> findAll();
+
+    List<CourseDto> findAllByEnabledTrue();
+
+    List<CourseDto> findCourseByInstructorId(Long instructorId);
+
+    boolean toggleCourse(Long courseId,String email);
 }

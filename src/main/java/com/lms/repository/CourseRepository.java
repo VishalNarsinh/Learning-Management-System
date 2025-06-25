@@ -13,5 +13,12 @@ public interface CourseRepository extends JpaRepository<Course,Long> {
     @Query("delete from Course c where c.courseId = :courseId")
     void deleteCourseById(long courseId);
 
-    List<Course> findCourseBySubCategory(SubCategory subCategory);
+    List<Course> findCourseBySubCategoryAndEnabledTrue(SubCategory subCategory);
+
+
+    List<Course> findByInstructor_UserId(long instructorUserId);
+
+
+    List<Course> findAllByEnabledTrue();
+
 }

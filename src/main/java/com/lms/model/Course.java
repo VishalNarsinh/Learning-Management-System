@@ -26,6 +26,9 @@ public class Course {
     @Column(length = 500, nullable = false)
     private String courseDescription;
 
+    @Column(nullable = false)
+    private boolean enabled;
+
 
     @OneToOne
     @JoinColumn(name = "image_id")

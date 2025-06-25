@@ -42,8 +42,13 @@ public class CourseController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> get() {
+    public ResponseEntity<?> getAllCourses() {
         return ResponseEntity.ok(courseService.findAll());
+    }
+
+    @GetMapping("/all-enabled")
+    public ResponseEntity<?> getAllEnabledCourses() {
+        return ResponseEntity.ok(courseService.findAllByEnabledTrue());
     }
 
     @PutMapping(value = "/{courseId}",consumes = {"multipart/form-data"})
@@ -56,4 +61,16 @@ public class CourseController {
         courseService.deleteCourse(courseId);
         return ResponseEntity.ok(CustomMessage.builder().message("Course deleted successfully").status("success").build());
     }
+
+    @PatchMapping("/{courseId}/toggle-status")
+    public ResponseEntity<?> toggleCourse(@PathVariable Long courseId,Principal principal) {
+        return ResponseEntity.ok(courseService.toggleCourse(courseId,principal.getName()));
+    }
+
+    @GetMapping("/subcategory/{subCategoryId}")
+    public ResponseEntity<?> getCourseBySubCategoryId(@PathVariable Long subCategoryId) {
+        return ResponseEntity.ok(courseService.findCourseBySubCategoryId(subCategoryId));
+    }
+
+
 }

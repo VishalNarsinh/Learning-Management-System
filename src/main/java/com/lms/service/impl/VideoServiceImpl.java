@@ -6,6 +6,7 @@ import com.lms.model.Lesson;
 import com.lms.model.Video;
 import com.lms.repository.LessonRepository;
 import com.lms.repository.VideoRepository;
+import com.lms.service.FileService;
 import com.lms.service.VideoService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,17 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class VideoServiceImpl implements VideoService {
 
+    private final FileService fileService;
     @Value("${files.video}")
     private String DIR;
 
@@ -77,6 +82,26 @@ public class VideoServiceImpl implements VideoService {
             throw new RuntimeException(e);
         }
     }
+
+//    @Override
+//    public Video saveVideo(MultipartFile file){
+//        try {
+//            StoredFileInfo fileInfo = fileService.saveFile(file, DIR);
+//            Video video = Video.builder()
+//                    .videoName(fileInfo.getOriginalFileName())
+//                    .videoUrl(fileInfo.getFileUrl())
+//                    .contentType(fileInfo.getContentType())
+//                    .processingStatus("PENDING")
+//                    .build();
+//            return videoRepository.save(video);
+//        } catch (Exception e) {
+//            log.error("Error saving video: {}", e.getMessage(), e);
+//            throw new RuntimeException("Could not save video", e);
+//        }
+//    }
+
+    
+
 
     @Override
     public Video getVideoByVideoId(long videoId) {

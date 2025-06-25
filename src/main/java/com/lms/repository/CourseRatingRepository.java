@@ -10,4 +10,6 @@ public interface CourseRatingRepository extends CrudRepository<CourseRating, Int
     Optional<CourseRating> findByEnrollment_EnrollmentId(Long enrollmentId);
 
     List<CourseRating> findByCourse_CourseId(Long courseId);
+
+
 }

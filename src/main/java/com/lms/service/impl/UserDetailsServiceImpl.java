@@ -67,7 +67,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, MyUserDetails
     public boolean toggleUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         user.setEnabled(!user.isEnabled());
-        userRepository.save(user);
-        return user.isEnabled();
+        User saved = userRepository.save(user);
+        return saved.isEnabled();
     }
 }

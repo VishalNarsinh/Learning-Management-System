@@ -3,10 +3,7 @@ package com.lms.service.impl;
 import com.lms.dto.CourseDto;
 import com.lms.exception.ResourceNotFoundException;
 import com.lms.mapper.CourseMapper;
-import com.lms.model.Course;
-import com.lms.model.Image;
-import com.lms.model.SubCategory;
-import com.lms.model.User;
+import com.lms.model.*;
 import com.lms.repository.CourseRepository;
 import com.lms.repository.SubCategoryRepository;
 import com.lms.repository.UserRepository;
@@ -16,6 +13,7 @@ import com.lms.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +40,7 @@ public class CourseServiceImpl implements CourseService {
         SubCategory subCategory = subCategoryRepository.findById(courseDto.getSubCategoryId()).orElseThrow(() -> new ResourceNotFoundException("SubCategory", "id", courseDto.getSubCategoryId()));
         Course course = courseMapper.toEntity(courseDto);
         course.setSubCategory(subCategory);
+        course.setEnabled(true);
         Image image = imageService.uploadImage(file, AppConstants.COURSE_IMAGE_FOLDER);
         log.info("image {}", image);
         course.setImage(image);
@@ -70,7 +69,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseDto> findCourseBySubCategoryId(Long subCategoryId) {
-        List<Course> courseBySubCategory = courseRepository.findCourseBySubCategory(subCategoryRepository.findById(subCategoryId).orElseThrow(() -> new ResourceNotFoundException("SubCategory", "id", subCategoryId)));
+        List<Course> courseBySubCategory = courseRepository.findCourseBySubCategoryAndEnabledTrue(subCategoryRepository.findById(subCategoryId).orElseThrow(() -> new ResourceNotFoundException("SubCategory", "id", subCategoryId)));
         return courseBySubCategory.stream().map(courseMapper::toDto).toList();
     }
 
@@ -83,5 +82,30 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<CourseDto> findAll() {
         return courseRepository.findAll().stream().map(courseMapper::toDto).toList();
+    }
+
+    @Override
+    public List<CourseDto> findAllByEnabledTrue() {
+        return courseRepository.findAllByEnabledTrue().stream().map(courseMapper::toDto).toList();
+    }
+
+
+    @Override
+    public List<CourseDto> findCourseByInstructorId(Long instructorId) {
+        return courseRepository.findByInstructor_UserId(instructorId).stream().map(courseMapper::toDto).toList();
+    }
+
+    @Override
+    public boolean toggleCourse(Long courseId,String email) {
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", "id", courseId));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        if (user.getRole().equals(Role.ROLE_ADMIN) ||course.getInstructor().getEmail().equals(email)) {
+            course.setEnabled(!course.isEnabled());
+        }
+        else {
+            throw new AccessDeniedException("You are not authorized to toggle this course.");
+        }
+        Course saved = courseRepository.save(course);
+        return saved.isEnabled();
     }
 }
