@@ -1,6 +1,7 @@
 package com.lms.service.impl;
 
 import com.lms.dto.SubCategoryDto;
+import com.lms.exception.DuplicateResourceException;
 import com.lms.exception.ResourceNotFoundException;
 import com.lms.mapper.CategoryMapper;
 import com.lms.model.Category;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,9 +41,14 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Override
     public SubCategoryDto saveSubCategory(SubCategoryDto subCategoryDto) {
+        String normalizedName = subCategoryDto.getName().toLowerCase(Locale.ROOT);
+        if(subCategoryRepository.findByName(normalizedName).isPresent()){
+            throw  new DuplicateResourceException("SubCategory name already exists.");
+        }
 
         SubCategory subCategory = categoryMapper.toEntity(subCategoryDto);
         log.info("SubCategory {}", subCategory);
+        subCategory.setName(normalizedName);
         subCategory.setCategory(categoryRepository.findById(subCategoryDto.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", subCategoryDto.getCategoryId())));
         return categoryMapper.toDto(subCategoryRepository.save(subCategory));
     }
@@ -48,9 +56,14 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Override
     @Transactional
     public SubCategoryDto updateSubCategory(SubCategoryDto subCategoryDto,long subCategoryId) {
+        String normalizedName = subCategoryDto.getName().toLowerCase(Locale.ROOT);
+        Optional<SubCategory> existingSubCategory = subCategoryRepository.findByName(normalizedName);
+        if(existingSubCategory.isPresent() && existingSubCategory.get().getSubCategoryId() != subCategoryId){
+            throw new DuplicateResourceException("SubCategory name already exists.");
+        }
         SubCategory subCategoryDB = subCategoryRepository.findById(subCategoryId).orElseThrow(() -> new ResourceNotFoundException("SubCategory", "subCategoryId", subCategoryId));
         Category category = categoryRepository.findById(subCategoryDto.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", subCategoryDto.getCategoryId()));
-        subCategoryDB.setName(subCategoryDto.getName());
+        subCategoryDB.setName(normalizedName);
         subCategoryDB.setCategory(category);
         return categoryMapper.toDto(subCategoryRepository.save(subCategoryDB));
     }

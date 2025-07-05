@@ -19,7 +19,7 @@ public class SubCategory {
     @Column(name = "sub_category_id")
     private long subCategoryId;
 
-    @Column(length = 80, nullable = false)
+    @Column(length = 80, nullable = false,unique = true)
     private String name;
 
     @ManyToOne

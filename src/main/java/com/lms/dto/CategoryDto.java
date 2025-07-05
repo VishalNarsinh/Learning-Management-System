@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class CategoryDto {
-    private Long categoryId;
+    private long categoryId;
     private String name;
 //    private List<SubCategoryDto> subCategories=new ArrayList<>();
 }

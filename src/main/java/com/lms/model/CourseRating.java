@@ -18,7 +18,7 @@ public class CourseRating {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ratingId;
+    private long ratingId;
 
     @OneToOne
     @JoinColumn(name = "enrollment_id", nullable = false)

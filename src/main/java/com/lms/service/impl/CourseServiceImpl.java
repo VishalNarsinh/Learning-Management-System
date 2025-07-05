@@ -1,18 +1,21 @@
 package com.lms.service.impl;
 
 import com.lms.dto.CourseDto;
+import com.lms.dto.PopularCourseDto;
 import com.lms.exception.ResourceNotFoundException;
 import com.lms.mapper.CourseMapper;
 import com.lms.model.*;
 import com.lms.repository.CourseRepository;
 import com.lms.repository.SubCategoryRepository;
 import com.lms.repository.UserRepository;
+import com.lms.repository.projection.PopularCourseProjection;
 import com.lms.service.CourseService;
 import com.lms.service.ImageService;
 import com.lms.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,5 +123,17 @@ public class CourseServiceImpl implements CourseService {
         }
         Course saved = courseRepository.save(course);
         return saved.isEnabled();
+    }
+
+    @Override
+    public List<PopularCourseDto> getPopularCourses() {
+        List<PopularCourseProjection> popularCourses = courseRepository.findPopularCourses(PageRequest.of(0, 5));
+        List<PopularCourseDto> list = popularCourses.stream().map(p -> {
+            PopularCourseDto dto = new PopularCourseDto();
+            dto.setCourse(courseMapper.toDto(p.getCourse()));
+            dto.setEnrollmentCount(p.getEnrollmentCount());
+            return dto;
+        }).toList();
+        return list;
     }
 }

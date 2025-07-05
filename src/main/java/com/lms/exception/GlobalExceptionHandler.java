@@ -21,6 +21,19 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponseDto> handleDuplicateResource(DuplicateResourceException ex, WebRequest webRequest) {
+        ErrorResponseDto errorResponse = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.CONFLICT,
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> resourceNotFound(ResourceNotFoundException ex, WebRequest webRequest) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(

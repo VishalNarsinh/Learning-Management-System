@@ -59,4 +59,8 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.getCourseProgressPercentage(email,enrollmentId));
     }
 
+    @GetMapping("/{courseId}")
+    public ResponseEntity<?> getUsersByCourse(@PathVariable Long courseId){
+        return ResponseEntity.ok(enrollmentService.getEnrollmentsByCourse(courseId));
+    }
 }

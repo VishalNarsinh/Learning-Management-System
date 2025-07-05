@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class CourseDto {
-    private Long courseId;
+    private long courseId;
     private String courseName;
     private String courseDescription;
     private boolean enabled;

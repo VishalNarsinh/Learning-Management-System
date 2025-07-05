@@ -74,6 +74,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return Math.round(percentage * 100.0) / 100.0;
     }
 
+    @Override
+    public List<EnrollmentResponse> getEnrollmentsByCourse(Long courseId) {
+        List<Enrollment> byCourseCourseId = enrollmentRepository.findByCourse_CourseId(courseId);
+        return byCourseCourseId.stream().map(EnrollmentMapper::toResponse).toList();
+    }
+
 
     @Override
     public List<EnrollmentResponse> getEnrollmentsByUser(Long userId) {

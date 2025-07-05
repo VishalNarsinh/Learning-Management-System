@@ -1,6 +1,7 @@
 package com.lms.service;
 
 import com.lms.dto.CourseDto;
+import com.lms.dto.PopularCourseDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -26,4 +27,6 @@ public interface CourseService {
     List<CourseDto> findCourseByInstructorId(Long instructorId);
 
     boolean toggleCourse(Long courseId,String email);
+
+    List<PopularCourseDto> getPopularCourses();
 }

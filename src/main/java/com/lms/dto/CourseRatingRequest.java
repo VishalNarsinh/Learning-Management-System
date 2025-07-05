@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseRatingRequest {
-    private Long enrollmentId;
+    private long enrollmentId;
     private int rating; // 1 to 5
     private String comment;
 }

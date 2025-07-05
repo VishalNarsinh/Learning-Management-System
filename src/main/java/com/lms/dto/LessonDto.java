@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LessonDto {
-    private Long lessonId;
+    private long lessonId;
     private String lessonName;
     private String lessonContent;
     private Image image;

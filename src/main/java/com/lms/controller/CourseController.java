@@ -77,5 +77,9 @@ public class CourseController {
         return ResponseEntity.ok(courseService.findCourseBySubCategoryId(subCategoryId));
     }
 
+    @GetMapping("/popular")
+    public ResponseEntity<?> getPopularCourses() {
+        return ResponseEntity.ok(courseService.getPopularCourses());
+    }
 
 }

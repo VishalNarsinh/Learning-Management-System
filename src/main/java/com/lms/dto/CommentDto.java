@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class CommentDto {
-    private Long commentId;
+    private long commentId;
     private String content;
     private Long userId;
     private String userName; // if needed for display
