@@ -9,4 +9,5 @@ import lombok.*;
 public class PopularCourseDto {
     private CourseDto course;
     private long enrollmentCount;
+    private double averageRating;
 }

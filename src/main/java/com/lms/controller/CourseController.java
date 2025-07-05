@@ -79,7 +79,12 @@ public class CourseController {
 
     @GetMapping("/popular")
     public ResponseEntity<?> getPopularCourses() {
-        return ResponseEntity.ok(courseService.getPopularCourses());
+        return ResponseEntity.ok(courseService.getPopularCoursesByEnrollment());
+    }
+
+    @GetMapping("/popular-with-rating")
+    public ResponseEntity<?> getPopularCoursesByEnrollmentAndRating() {
+        return ResponseEntity.ok(courseService.getPopularCoursesByEnrollmentAndRating());
     }
 
 }

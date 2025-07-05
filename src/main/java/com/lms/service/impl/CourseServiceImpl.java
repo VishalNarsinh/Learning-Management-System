@@ -9,6 +9,7 @@ import com.lms.repository.CourseRepository;
 import com.lms.repository.SubCategoryRepository;
 import com.lms.repository.UserRepository;
 import com.lms.repository.projection.PopularCourseProjection;
+import com.lms.repository.projection.PopularCourseWithRatingProjection;
 import com.lms.service.CourseService;
 import com.lms.service.ImageService;
 import com.lms.utils.AppConstants;
@@ -126,14 +127,27 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<PopularCourseDto> getPopularCourses() {
+    public List<PopularCourseDto> getPopularCoursesByEnrollment() {
         List<PopularCourseProjection> popularCourses = courseRepository.findPopularCourses(PageRequest.of(0, 5));
-        List<PopularCourseDto> list = popularCourses.stream().map(p -> {
+        return popularCourses.stream().map(p -> {
             PopularCourseDto dto = new PopularCourseDto();
             dto.setCourse(courseMapper.toDto(p.getCourse()));
             dto.setEnrollmentCount(p.getEnrollmentCount());
             return dto;
         }).toList();
-        return list;
     }
+
+    @Override
+    public List<PopularCourseDto> getPopularCoursesByEnrollmentAndRating() {
+        List<PopularCourseWithRatingProjection> popularCoursesWithRatings = courseRepository.findPopularCoursesWithRatings(PageRequest.of(0, 5));
+        return popularCoursesWithRatings.stream().map(c->{
+            PopularCourseDto dto = new PopularCourseDto();
+            dto.setCourse(courseMapper.toDto(c.getCourse()));
+            dto.setEnrollmentCount(c.getEnrollmentCount());
+            dto.setAverageRating(c.getAverageRating());
+            return dto;
+        }).toList();
+    }
+
+
 }

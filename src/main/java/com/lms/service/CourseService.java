@@ -28,5 +28,9 @@ public interface CourseService {
 
     boolean toggleCourse(Long courseId,String email);
 
-    List<PopularCourseDto> getPopularCourses();
+    List<PopularCourseDto> getPopularCoursesByEnrollment();
+
+    List<PopularCourseDto> getPopularCoursesByEnrollmentAndRating();
+
+
 }
