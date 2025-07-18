@@ -26,6 +26,7 @@ public interface CourseService {
 
     List<CourseDto> findCourseByInstructorId(Long instructorId);
 
+    List<CourseDto> findCourseOfLoggedInInstructor(String email);
     boolean toggleCourse(Long courseId,String email);
 
     List<PopularCourseDto> getPopularCoursesByEnrollment();

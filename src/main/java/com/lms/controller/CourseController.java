@@ -87,4 +87,13 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getPopularCoursesByEnrollmentAndRating());
     }
 
+    @GetMapping("/instructor/{instructorId}")
+    public ResponseEntity<?> getCoursesByInstructorId(@PathVariable Long instructorId) {
+        return ResponseEntity.ok(courseService.findCourseByInstructorId(instructorId));
+    }
+
+    @GetMapping("/instructor/my-courses")
+    public ResponseEntity<?> getMyCourses(Principal principal) {
+        return ResponseEntity.ok(courseService.findCourseOfLoggedInInstructor(principal.getName()));
+    }
 }

@@ -15,6 +15,7 @@ public class CourseDto {
     private boolean enabled;
     private Image image;
     private Long subCategoryId;
+    private Long instructorId;
 //    private List<LessonDto> lessons = new ArrayList<>();
 //
 //    public List<LessonDto> getLessons() {

@@ -52,7 +52,7 @@ public class CourseMapper {
         dto.setCourseDescription(course.getCourseDescription());
         dto.setImage(course.getImage()); // No mapping needed
         dto.setSubCategoryId(course.getSubCategory() != null ? course.getSubCategory().getSubCategoryId() : null);
-
+        dto.setInstructorId(course.getInstructor().getUserId());
 //        if (course.getLessons() != null) {
 //            List<LessonDto> lessonDtos = course.getLessons().stream()
 //                    .map(lessonMapper::toDto)

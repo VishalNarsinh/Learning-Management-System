@@ -19,8 +19,9 @@ public interface CourseRepository extends JpaRepository<Course,Long> {
     List<Course> findCourseBySubCategoryAndEnabledTrue(SubCategory subCategory);
 
 
-    List<Course> findByInstructor_UserId(long instructorUserId);
+    List<Course> findByInstructor_UserIdAndEnabledTrue(long instructorUserId);
 
+    List<Course> findByInstructor_UserId(long instructorUserId);
 
     List<Course> findAllByEnabledTrue();
 

@@ -109,7 +109,13 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseDto> findCourseByInstructorId(Long instructorId) {
-        return courseRepository.findByInstructor_UserId(instructorId).stream().map(courseMapper::toDto).toList();
+        return courseRepository.findByInstructor_UserIdAndEnabledTrue(instructorId).stream().map(courseMapper::toDto).toList();
+    }
+
+    @Override
+    public List<CourseDto> findCourseOfLoggedInInstructor(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        return courseRepository.findByInstructor_UserId(user.getUserId()).stream().map(courseMapper::toDto).toList();
     }
 
     @Override
