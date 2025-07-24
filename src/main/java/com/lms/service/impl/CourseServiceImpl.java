@@ -65,6 +65,7 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.deleteCourseById(courseId);
     }
 
+    @Transactional
     @Override
     public CourseDto updateCourse(CourseDto courseDto,long courseId,MultipartFile file,String instructorEmail) throws IOException {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", "id", courseId));
@@ -73,10 +74,13 @@ public class CourseServiceImpl implements CourseService {
         }
         if(file != null && !file.isEmpty()) {
             if(course.getImage() != null){
-                imageService.deleteImage(course.getImage().getImageId());
-                Image image = imageService.uploadImage(file, AppConstants.COURSE_IMAGE_FOLDER);
-                course.setImage(image);
+                Image image = course.getImage();
+                course.setImage(null);
+                courseRepository.save(course);
+                imageService.deleteImage(image.getImageId());
             }
+            Image image = imageService.uploadImage(file, AppConstants.COURSE_IMAGE_FOLDER);
+            course.setImage(image);
         }
         course.setCourseName(courseDto.getCourseName());
         course.setCourseDescription(courseDto.getCourseDescription());
