@@ -44,7 +44,7 @@ public class VideoController {
     }
 
     @GetMapping("/stream/{videoId}")
-    public ResponseEntity<?> getVideo(@PathVariable("videoId") long videoId) {
+    public ResponseEntity<Resource> getVideo(@PathVariable("videoId") long videoId) {
         Video video = videoService.getVideoByVideoId(videoId);
         String videoUrl = video.getVideoUrl();
         String contentType = video.getContentType();
@@ -59,7 +59,7 @@ public class VideoController {
     }
 
     @GetMapping("/stream/range/{videoId}")
-    public ResponseEntity<?> getVideoRange(@PathVariable("videoId") long videoId,
+    public ResponseEntity<Resource> getVideoRange(@PathVariable("videoId") long videoId,
                                            @RequestHeader(name = "range", required = false) String range) throws IOException {
         if (range == null || range.isEmpty()) {
             return getVideo(videoId);

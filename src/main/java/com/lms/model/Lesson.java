@@ -40,6 +40,6 @@ public class Lesson {
     private Course course;
 
 
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.REMOVE,orphanRemoval = true)
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.REMOVE,orphanRemoval = true,fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 }

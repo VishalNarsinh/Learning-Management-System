@@ -53,7 +53,7 @@ public class CourseController {
     }
 
     @PutMapping(value = "/{courseId}",consumes = {"multipart/form-data"})
-    public ResponseEntity<?> updateCourse(@PathVariable long courseId, @RequestParam("course")String courseDtoData,@RequestParam("file") MultipartFile file,Principal principal) {
+    public ResponseEntity<?> updateCourse(@PathVariable long courseId, @RequestParam("course")String courseDtoData,@RequestParam(value = "file",required = false) MultipartFile file,Principal principal) {
         try {
             CourseDto courseDto = objectMapper.readValue(courseDtoData, CourseDto.class);
             return ResponseEntity.ok(courseService.updateCourse(courseDto, courseId, file, principal.getName()));
@@ -61,6 +61,8 @@ public class CourseController {
             throw new ApiException("Error while processing course image"+e.getMessage());
         }
     }
+
+
 
     @DeleteMapping("/{courseId}")
     public ResponseEntity<?> deleteCourse(@PathVariable long courseId) {

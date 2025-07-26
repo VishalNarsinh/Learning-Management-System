@@ -43,7 +43,7 @@ public class Course {
     @JoinColumn(name = "user_id")
     private User instructor;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
     private List<Lesson> lessons = new ArrayList<>();
 
     @Override

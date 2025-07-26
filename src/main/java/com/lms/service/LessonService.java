@@ -9,9 +9,9 @@ import java.util.List;
 public interface LessonService {
 
 
-    LessonDto saveLesson(LessonDto lessonDto, MultipartFile imageFile, MultipartFile videofile) throws IOException;
+    LessonDto saveLesson(LessonDto lessonDto, MultipartFile imageFile, MultipartFile videoFile) throws IOException;
 
-    LessonDto updateLesson(LessonDto lessonDto,long lessonId,MultipartFile file);
+    LessonDto updateLesson(long lessonId, LessonDto lessonDto,MultipartFile imageFile, MultipartFile videoFile,String instructorEmail) throws IOException;
 
     void deleteLesson(long lessonId);
 

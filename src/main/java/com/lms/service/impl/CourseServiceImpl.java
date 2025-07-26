@@ -76,7 +76,7 @@ public class CourseServiceImpl implements CourseService {
             if(course.getImage() != null){
                 Image image = course.getImage();
                 course.setImage(null);
-                courseRepository.save(course);
+//                courseRepository.save(course);
                 imageService.deleteImage(image.getImageId());
             }
             Image image = imageService.uploadImage(file, AppConstants.COURSE_IMAGE_FOLDER);

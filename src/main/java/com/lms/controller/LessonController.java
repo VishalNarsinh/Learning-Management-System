@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/v1/lessons")
 @RequiredArgsConstructor
@@ -35,8 +38,9 @@ public class LessonController {
     }
 
     @PutMapping("/{lessonId}")
-    public ResponseEntity<?> updateLesson(@PathVariable long lessonId,@RequestBody LessonDto lessonDto) {
-        return ResponseEntity.ok("");
+    public ResponseEntity<?> updateLesson(@PathVariable long lessonId, @RequestParam("lessonDto") String lessonDtoData, @RequestParam(value = "imageFile",required = false) MultipartFile imageFile, @RequestParam(value = "videoFile",required = false)MultipartFile videoFile, Principal principal) throws IOException {
+        LessonDto lessonDto = objectMapper.readValue(lessonDtoData, LessonDto.class);
+        return ResponseEntity.ok(lessonService.updateLesson(lessonId,lessonDto,imageFile,videoFile,principal.getName()));
     }
 
     @GetMapping("/course/{courseId}")

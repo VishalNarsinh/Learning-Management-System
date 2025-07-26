@@ -66,8 +66,8 @@ public class VideoServiceImpl implements VideoService {
             String cleanFileName = StringUtils.cleanPath(filename);
             String cleanFolderName = StringUtils.cleanPath(DIR);
             Path path = Paths.get(cleanFolderName,cleanFileName);
-            log.info("Content Type {}",contentType);
-            log.info("Path {}", path);
+//            log.info("Content Type {}",contentType);
+//            log.info("Path {}", path);
             Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
             Video video = Video.builder()
                     .videoName(filename)

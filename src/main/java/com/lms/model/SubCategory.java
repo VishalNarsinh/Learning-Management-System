@@ -26,6 +26,6 @@ public class SubCategory {
     @JoinColumn(name = "category_id",nullable = false)
     private Category category;
 
-    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Course> courses = new ArrayList<>();
 }
