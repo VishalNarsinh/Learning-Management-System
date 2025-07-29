@@ -70,4 +70,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, MyUserDetails
         User saved = userRepository.save(user);
         return saved.isEnabled();
     }
+
+    @Override
+    public UserDto findUserById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        return UserMapper.toDto(user);
+    }
 }

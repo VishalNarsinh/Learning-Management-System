@@ -17,4 +17,6 @@ public interface MyUserDetailsService {
     List<UserDto> findUserByRole(Role role);
 
     boolean toggleUser(Long userId);
+
+    UserDto findUserById(Long userId);
 }

@@ -43,4 +43,8 @@ public class UserController {
         return ResponseEntity.ok(new CustomMessage("User deleted successfully", "success"));
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(myUserDetailsService.findUserById(userId));
+    }
 }
