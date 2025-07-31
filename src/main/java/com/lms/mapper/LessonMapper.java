@@ -30,6 +30,7 @@ public class LessonMapper {
         dto.setLessonId(lesson.getLessonId());
         dto.setLessonName(lesson.getLessonName());
         dto.setLessonContent(lesson.getLessonContent());
+        dto.setSequenceNumber(lesson.getSequenceNumber());
         dto.setImage(lesson.getImage());
         dto.setVideo(lesson.getVideo());
         dto.setCourseId(lesson.getCourse() != null ? lesson.getCourse().getCourseId() : null);

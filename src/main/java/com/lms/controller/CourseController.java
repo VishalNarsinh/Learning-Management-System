@@ -33,6 +33,7 @@ public class CourseController {
     @PostMapping(value = "/")
     public ResponseEntity<?> saveCourse(@RequestParam("course")String courseDtoData, @RequestParam("file") MultipartFile file, Principal principal) throws IOException {
         String email = principal.getName();
+        log.info("{}",email);
         CourseDto courseDto = objectMapper.readValue(courseDtoData, CourseDto.class);
         return ResponseEntity.ok(courseService.saveCourse(courseDto,file,email));
     }

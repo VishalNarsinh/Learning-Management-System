@@ -30,7 +30,7 @@ public class User implements UserDetails {
     @Column(length = 100, nullable = false)
     private String password;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "image_id")
     private Image image;
 

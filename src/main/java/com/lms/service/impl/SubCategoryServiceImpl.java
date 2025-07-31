@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,12 +77,12 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Override
     public List<SubCategoryDto> findSubCategoriesByCategoryId(long categoryId) {
-        List<SubCategory> list = subCategoryRepository.findByCategoryCategoryId(categoryId);
+        List<SubCategory> list = subCategoryRepository.findByCategoryCategoryId(categoryId,Sort.by(Sort.Direction.ASC, "name"));
         return list.stream().map(categoryMapper::toDto).toList();
     }
 
     @Override
     public List<SubCategoryDto> findAll() {
-        return subCategoryRepository.findAll().stream().map(categoryMapper::toDto).toList();
+        return subCategoryRepository.findAll(Sort.by(Sort.Direction.ASC, "name")).stream().map(categoryMapper::toDto).toList();
     }
 }

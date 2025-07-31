@@ -6,6 +6,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,6 +21,21 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
+            AccessDeniedException ex, WebRequest request) {
+
+        ErrorResponseDto errorResponse = new ErrorResponseDto(
+                request.getDescription(false),
+                HttpStatus.FORBIDDEN,
+                HttpStatus.FORBIDDEN.value(),
+                "You're not authorized to make this request",
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponseDto> handleDuplicateResource(DuplicateResourceException ex, WebRequest webRequest) {

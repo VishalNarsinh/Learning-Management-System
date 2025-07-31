@@ -5,6 +5,7 @@ import com.lms.dto.CustomMessage;
 import com.lms.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/")
     public ResponseEntity<?> saveCategory(@RequestBody CategoryDto categoryDto) {
         return ResponseEntity.ok(categoryService.saveCategory(categoryDto));

@@ -6,6 +6,8 @@ import com.google.cloud.storage.Storage;
 import com.lms.model.Image;
 import com.lms.service.GCSService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @Primary
 @RequiredArgsConstructor
 public class GCSServiceImpl implements GCSService {
+    private static final Logger log = LoggerFactory.getLogger(GCSServiceImpl.class);
     private final Storage storage;
 
     @Value("${gcs.bucket.name}")
@@ -51,6 +54,7 @@ public class GCSServiceImpl implements GCSService {
 
     @Override
     public boolean deleteFile(String objectName) {
+        log.info("Deleting file {}", objectName);
         return storage.delete(bucketName, objectName);
     }
 }

@@ -10,6 +10,7 @@ import com.lms.repository.CategoryRepository;
 import com.lms.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,6 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> findAll() {
-        return categoryRepository.findAll().stream().map(categoryMapper::toDto).toList();
+        Sort sort =  Sort.by(Sort.Direction.ASC, "name");
+        return categoryRepository.findAll(sort).stream().map(categoryMapper::toDto).toList();
     }
 }

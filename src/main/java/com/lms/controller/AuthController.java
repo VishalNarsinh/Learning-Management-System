@@ -13,7 +13,7 @@ import com.lms.model.User;
 import com.lms.repository.ImageRepository;
 import com.lms.repository.UserRepository;
 import com.lms.security.jwt.JwtUtil;
-import com.lms.service.impl.UserDetailsServiceImpl;
+import com.lms.service.MyUserDetailsService;
 import com.lms.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ import java.util.UUID;
 public class AuthController {
 
     private final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    private final UserDetailsServiceImpl userDetailsService;
+    private final MyUserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;

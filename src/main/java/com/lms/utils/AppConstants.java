@@ -11,5 +11,6 @@ public class AppConstants {
     public static final String ROLE_STUDENT = "ROLE_STUDENT";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String DEFAULT_USER_IMAGE = "https://storage.googleapis.com/we_image_bucket/user/default-user.jpg";
+    public static final String DEFAULT_USER_IMAGE_NAME = "default-user.jpg";
 
 }

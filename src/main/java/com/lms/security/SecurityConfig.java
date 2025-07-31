@@ -1,5 +1,6 @@
 package com.lms.security;
 
+import com.lms.security.jwt.CustomAccessDeniedHandler;
 import com.lms.security.jwt.JwtAuthenticationEntryPoint;
 import com.lms.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +36,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, CustomAccessDeniedHandler customAccessDeniedHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors->cors.configurationSource(corsConfigurationSource()))
@@ -57,7 +58,10 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+//                        .accessDeniedHandler(customAccessDeniedHandler)
+                );
         return http.build();
     }
 }

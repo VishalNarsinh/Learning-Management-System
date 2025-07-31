@@ -1,16 +1,15 @@
 package com.lms.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "lessons")
+@Table(name = "lessons",uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"course_id","sequence_number"})
+})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -27,6 +26,10 @@ public class Lesson {
 
     private String lessonContent;
 
+    @Column(name = "sequence_number", nullable = false)
+    private int sequenceNumber;
+
+
     @OneToOne
     @JoinColumn(name = "image_id")
     private Image image;
@@ -40,6 +43,17 @@ public class Lesson {
     private Course course;
 
 
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.REMOVE,orphanRemoval = true,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.REMOVE,orphanRemoval = true,fetch = FetchType.EAGER)
     private List<Comment> comments = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "Lesson{" +
+                "video=" + video +
+                ", image=" + image +
+                ", lessonContent='" + lessonContent + '\'' +
+                ", lessonName='" + lessonName + '\'' +
+                ", lessonId=" + lessonId +
+                '}';
+    }
 }
