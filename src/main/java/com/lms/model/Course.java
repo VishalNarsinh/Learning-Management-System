@@ -18,7 +18,7 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
-    private long courseId;
+    private Long courseId;
 
     @Column(length = 80, nullable = false)
     private String courseName;

@@ -20,6 +20,8 @@ public interface LessonService {
 
     CompletableFuture<LessonDto> updateLessonAsync(long lessonId, LessonDto lessonDto, MultipartFile imageFile, MultipartFile videoFile, String instructorEmail) throws IOException;
 
+    CompletableFuture<LessonDto> updateLessonAsync1(long lessonId, LessonDto lessonDto, MultipartFile imageFile, MultipartFile videoFile, String instructorEmail) throws IOException;
+
     CompletableFuture<Void> updateImage(Lesson lesson, MultipartFile file);
 
     CompletableFuture<Void> updateVideo(Lesson lesson, MultipartFile file);

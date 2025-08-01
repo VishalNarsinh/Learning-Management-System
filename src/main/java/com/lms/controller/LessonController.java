@@ -51,9 +51,21 @@ public class LessonController {
     }
 
     @PutMapping("/{lessonId}")
-    public ResponseEntity<?> updateLesson(@PathVariable long lessonId, @RequestParam("lessonDto") String lessonDtoData, @RequestParam(value = "imageFile",required = false) MultipartFile imageFile, @RequestParam(value = "videoFile",required = false)MultipartFile videoFile, Principal principal) throws IOException, ExecutionException, InterruptedException {
+    public ResponseEntity<?> updateLesson(@PathVariable long lessonId, @RequestParam("lesson") String lessonDtoData, @RequestParam(value = "image",required = false) MultipartFile imageFile, @RequestParam(value = "video",required = false)MultipartFile videoFile, Principal principal) throws IOException, ExecutionException, InterruptedException {
         LessonDto lessonDto = objectMapper.readValue(lessonDtoData, LessonDto.class);
         return ResponseEntity.ok(lessonService.updateLesson(lessonId,lessonDto,imageFile,videoFile,principal.getName()));
+    }
+
+    @PutMapping("/async/{lessonId}")
+    public ResponseEntity<?> updateLessonAsync(@PathVariable long lessonId, @RequestParam("lesson") String lessonDtoData, @RequestParam(value = "image",required = false) MultipartFile imageFile, @RequestParam(value = "video",required = false)MultipartFile videoFile, Principal principal) throws IOException, ExecutionException, InterruptedException {
+        LessonDto lessonDto = objectMapper.readValue(lessonDtoData, LessonDto.class);
+        return ResponseEntity.ok(lessonService.updateLessonAsync(lessonId,lessonDto,imageFile,videoFile,principal.getName()).get());
+    }
+
+    @PutMapping("/async1/{lessonId}")
+    public ResponseEntity<?> updateLessonAsync1(@PathVariable long lessonId, @RequestParam("lesson") String lessonDtoData, @RequestParam(value = "image",required = false) MultipartFile imageFile, @RequestParam(value = "video",required = false)MultipartFile videoFile, Principal principal) throws IOException, ExecutionException, InterruptedException {
+        LessonDto lessonDto = objectMapper.readValue(lessonDtoData, LessonDto.class);
+        return ResponseEntity.ok(lessonService.updateLessonAsync1(lessonId,lessonDto,imageFile,videoFile,principal.getName()).get());
     }
 
     @PatchMapping("/{lessonId}/sequence")

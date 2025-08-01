@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -42,17 +41,24 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public LessonDto saveLesson(LessonDto lessonDto, MultipartFile imageFile, MultipartFile videoFile) throws IOException {
+        long start = System.currentTimeMillis();
         Lesson entity = lessonMapper.toEntity(lessonDto);
         entity.setCourse(courseRepository.findById(lessonDto.getCourseId()).orElseThrow(() -> new ResourceNotFoundException("Course", "id", lessonDto.getCourseId())));
         int nextSequence = lessonRepository.getMaxSequenceNumberByCourseId(lessonDto.getCourseId()) + 1;
         entity.setSequenceNumber(nextSequence);
-        Image image = imageService.uploadImage(imageFile, "lesson");
-        log.info("Image Id : {}", image.getImageId());
-        entity.setImage(image);
-        Video video = videoService.saveVideo(videoFile);
-        log.info("Video Id : {}", video.getVideoId());
-        entity.setVideo(video);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            Image image = imageService.uploadImage(imageFile, "lesson");
+            log.info("Image Id : {}", image.getImageId());
+            entity.setImage(image);
+        }
+        if (videoFile != null && !videoFile.isEmpty()) {
+            Video video = videoService.saveVideo(videoFile);
+            log.info("Video Id : {}", video.getVideoId());
+            entity.setVideo(video);
+        }
+
         log.info("{}", entity);
+        log.info("Total Time : {}", System.currentTimeMillis() - start);
         return lessonMapper.toDto(lessonRepository.save(entity));
     }
 
@@ -62,14 +68,14 @@ public class LessonServiceImpl implements LessonService {
         entity.setCourse(courseRepository.findById(lessonDto.getCourseId()).orElseThrow(() -> new ResourceNotFoundException("Course", "id", lessonDto.getCourseId())));
         int nextSequence = lessonRepository.getMaxSequenceNumberByCourseId(lessonDto.getCourseId()) + 1;
         entity.setSequenceNumber(nextSequence);
-        CompletableFuture<Image> imageFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Image> imageFuture = (imageFile != null && !imageFile.isEmpty()) ? CompletableFuture.supplyAsync(() -> {
             try {
                 return imageService.uploadImage(imageFile, "lesson");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }, lessonTaskExecutor);
-        CompletableFuture<Video> videoFuture = CompletableFuture.supplyAsync(() -> videoService.saveVideo(videoFile), lessonTaskExecutor);
+        }, lessonTaskExecutor) : CompletableFuture.completedFuture(null);
+        CompletableFuture<Video> videoFuture =  (videoFile != null && !videoFile.isEmpty()) ? CompletableFuture.supplyAsync(() -> videoService.saveVideo(videoFile), lessonTaskExecutor): CompletableFuture.completedFuture(null);
         return imageFuture.thenCombine(videoFuture, (image, video) -> {
                     entity.setImage(image);
                     entity.setVideo(video);
@@ -80,7 +86,6 @@ public class LessonServiceImpl implements LessonService {
                     log.error("{}", ex);
                     throw new RuntimeException(ex);
                 });
-
     }
 
     @Override
@@ -89,62 +94,44 @@ public class LessonServiceImpl implements LessonService {
         if (!lesson.getCourse().getInstructor().getEmail().equals(instructorEmail))
             throw new AccessDeniedException("You are not allowed to update this lesson");
         if (imageFile != null && !imageFile.isEmpty()) {
-            long imageId = lesson.getImage().getImageId();
-            lesson.setImage(null);
-
-            imageService.deleteImage(imageId);
-            Image image = imageService.uploadImage(imageFile, "lesson");
-            lesson.setImage(image);
-            log.info("{}", image);
+            Image oldImage = lesson.getImage();
+            if (oldImage != null) {
+                lesson.setImage(null);
+                imageService.deleteImage(oldImage.getImageId());
+            }
+            Image newImage = imageService.uploadImage(imageFile, "lesson");
+            lesson.setImage(newImage);
+            log.info("{}", newImage);
         }
         if (videoFile != null && !videoFile.isEmpty()) {
-            long videoId = lesson.getVideo().getVideoId();
-            lesson.setVideo(null);
-            videoService.deleteVideo(videoId);
-            Video video = videoService.saveVideo(videoFile);
-            lesson.setVideo(video);
-            log.info("{}", video);
+            Video oldVideo = lesson.getVideo();
+            if (oldVideo != null) {
+                lesson.setVideo(null);
+                videoService.deleteVideo(oldVideo.getVideoId());
+            }
+            Video newVideo = videoService.saveVideo(videoFile);
+            lesson.setVideo(newVideo);
+            log.info("{}", newVideo);
         }
         lesson.setLessonName(lessonDto.getLessonName());
         lesson.setLessonContent(lessonDto.getLessonContent());
         return lessonMapper.toDto(lessonRepository.save(lesson));
     }
-
-
-
-
     @Override
     public CompletableFuture<LessonDto> updateLessonAsync(long lessonId, LessonDto lessonDto, MultipartFile imageFile, MultipartFile videoFile, String instructorEmail) throws IOException {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new ResourceNotFoundException("Lesson", "id", lessonId));
         if (!lesson.getCourse().getInstructor().getEmail().equals(instructorEmail))
             throw new AccessDeniedException("You are not allowed to update this lesson");
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            futures.add(updateImage(lesson, imageFile).thenAccept(updated -> {}));
-        }
-
-        if (videoFile != null && !videoFile.isEmpty()) {
-            futures.add(updateVideo(lesson, videoFile).thenAccept(updated -> {}));
-        }
-
-        // Run image/video updates in parallel
-        CompletableFuture<Void> combined = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-
-        return combined.thenApply(v -> {
-                    lesson.setLessonName(lessonDto.getLessonName());
-                    lesson.setLessonContent(lessonDto.getLessonContent());
-                    return lessonRepository.save(lesson);
-                })
-                .thenApply(lessonMapper::toDto)
-                .exceptionally(ex -> {
-                    log.error("Failed to update lesson {}", ex.getMessage(), ex);
-                    throw new RuntimeException(ex);
-                });
+       lesson.setLessonName(lessonDto.getLessonName());
+       lesson.setLessonContent(lessonDto.getLessonContent());
+        CompletableFuture<Void> imageFuture = (imageFile != null && !imageFile.isEmpty()) ?updateImage(lesson,imageFile): CompletableFuture.completedFuture(null);
+        CompletableFuture<Void> videoFuture =  (videoFile != null && !videoFile.isEmpty()) ?updateVideo(lesson,videoFile): CompletableFuture.completedFuture(null);
+        return CompletableFuture.allOf(imageFuture, videoFuture)
+                .thenApply(voidResult -> lessonRepository.save(lesson))
+                .thenApply(lessonMapper::toDto);
     }
 
-
-
+    @Override
     public CompletableFuture<LessonDto> updateLessonAsync1(long lessonId, LessonDto lessonDto, MultipartFile imageFile, MultipartFile videoFile, String instructorEmail) throws IOException {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new ResourceNotFoundException("Lesson", "id", lessonId));
         if (!lesson.getCourse().getInstructor().getEmail().equals(instructorEmail))
@@ -152,28 +139,29 @@ public class LessonServiceImpl implements LessonService {
 
         CompletableFuture<Void> imageFuture = CompletableFuture.runAsync(() -> {
             if (imageFile != null && !imageFile.isEmpty()) {
-                long imageId = lesson.getImage().getImageId();
-                lesson.setImage(null);
-                imageService.deleteImage(imageId);
-                Image image;
+                Image oldImage = lesson.getImage();
+                if (oldImage != null) {
+                    lesson.setImage(null);
+                    imageService.deleteImage(oldImage.getImageId());
+                }
                 try {
-                    image = imageService.uploadImage(imageFile, "lesson");
+                    lesson.setImage( imageService.uploadImage(imageFile, "lesson"));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                lesson.setImage(image);
-                log.info("{}", image);
             }
         }, lessonTaskExecutor);
 
         CompletableFuture<Void> videoFuture = CompletableFuture.runAsync(() -> {
             if (videoFile != null && !videoFile.isEmpty()) {
-                long videoId = lesson.getVideo().getVideoId();
-                lesson.setVideo(null);
-                videoService.deleteVideo(videoId);
-                Video video = videoService.saveVideo(videoFile);
-                lesson.setVideo(video);
-                log.info("{}", video);
+                Video oldVideo = lesson.getVideo();
+                if (oldVideo != null) {
+                    lesson.setVideo(null);
+                    videoService.deleteVideo(oldVideo.getVideoId());
+                }
+                Video newVideo = videoService.saveVideo(videoFile);
+                lesson.setVideo(newVideo);
+                log.info("{}", newVideo);
             }
         }, lessonTaskExecutor);
 
@@ -195,11 +183,12 @@ public class LessonServiceImpl implements LessonService {
     public CompletableFuture<Void> updateImage(Lesson lesson, MultipartFile file) {
         return CompletableFuture.runAsync(() -> {
             try {
-                long oldImageId = lesson.getImage().getImageId();
-                lesson.setImage(null);
-                lessonRepository.save(lesson);
-                imageService.deleteImage(oldImageId);
-                lesson.setImage(imageService.uploadImage(file, "lesson"));
+                Image oldImage = lesson.getImage();
+                if (oldImage != null) {
+                    lesson.setImage(null);
+                    imageService.deleteImage(oldImage.getImageId());
+                }
+                lesson.setImage( imageService.uploadImage(file, "lesson"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -209,15 +198,14 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public CompletableFuture<Void> updateVideo(Lesson lesson, MultipartFile file) {
         return CompletableFuture.runAsync(() -> {
-            try {
-                long oldVideoId = lesson.getVideo().getVideoId();
+            Video oldVideo = lesson.getVideo();
+            if (oldVideo != null) {
                 lesson.setVideo(null);
-                lessonRepository.save(lesson);
-                videoService.deleteVideo(oldVideoId);
-                lesson.setVideo(videoService.saveVideo(file));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                videoService.deleteVideo(oldVideo.getVideoId());
             }
+            Video newVideo = videoService.saveVideo(file);
+            lesson.setVideo(newVideo);
+            log.info("{}", newVideo);
         }, lessonTaskExecutor);
     }
 
@@ -251,6 +239,8 @@ public class LessonServiceImpl implements LessonService {
     public void updateLessonSequence(Long courseId, Long lessonId, int newPosition) {
         Lesson lessonToMove = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", "id", lessonId));
+        if (!lessonToMove.getCourse().getCourseId().equals(courseId))
+            throw new IllegalArgumentException("Lesson does not belong to the specified course");
 
         int currentPosition = lessonToMove.getSequenceNumber();
 

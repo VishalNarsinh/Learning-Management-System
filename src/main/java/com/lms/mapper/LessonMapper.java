@@ -35,7 +35,9 @@ public class LessonMapper {
         dto.setVideo(lesson.getVideo());
         dto.setCourseId(lesson.getCourse() != null ? lesson.getCourse().getCourseId() : null);
         dto.setComments(
-                lesson.getComments().stream().map(comment -> CommentDto.builder()
+                lesson.getComments()
+                            .stream()
+                            .map(comment -> CommentDto.builder()
                             .commentId(comment.getCommentId())
                             .content(comment.getContent())
                             .userName(comment.getUser() != null ? comment.getUser().getFirstName() : null)
