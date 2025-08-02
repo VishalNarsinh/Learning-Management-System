@@ -14,6 +14,7 @@ public interface LessonRepository extends JpaRepository<Lesson,Long> {
     void deleteByLessonId(long lessonId);
 
     List<Lesson> findByCourseCourseId(Long courseId);
+    List<Lesson> findByCourseCourseIdOrderBySequenceNumber(Long courseId);
 
     long countByCourse_CourseId(long courseCourseId);
 

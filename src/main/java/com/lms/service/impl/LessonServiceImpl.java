@@ -232,7 +232,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public List<LessonDto> findLessonsByCourseId(long courseId) {
-        return lessonRepository.findByCourseCourseId(courseId).stream().map(lessonMapper::toDto).toList();
+        return lessonRepository.findByCourseCourseIdOrderBySequenceNumber(courseId).stream().map(lessonMapper::toDto).toList();
     }
 
     @Override
