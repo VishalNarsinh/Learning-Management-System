@@ -2,6 +2,7 @@ package com.lms.service;
 
 import com.lms.dto.RegisterRequest;
 import com.lms.dto.UserDto;
+import com.lms.dto.UserUpdateRequest;
 import com.lms.model.Role;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +16,9 @@ public interface MyUserDetailsService extends UserDetailsService {
 
     UserDto saveUser(RegisterRequest registerRequest);
 
-    UserDto updateUser(RegisterRequest registerRequest, MultipartFile file,String email) throws IOException;
+    UserDto updateUser(UserUpdateRequest registerRequest, String email) throws IOException;
+
+    void updateUserImage(MultipartFile file, String email) throws IOException;
 
     void deleteUser(long userId);
 

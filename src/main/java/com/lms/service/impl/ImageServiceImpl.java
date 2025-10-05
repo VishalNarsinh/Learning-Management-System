@@ -6,6 +6,7 @@ import com.lms.repository.ImageRepository;
 import com.lms.service.GCSService;
 import com.lms.service.ImageService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public Image
     uploadImage(MultipartFile file, String folder) throws IOException {
+        if(file == null || file.isEmpty()) {
+            throw new BadRequestException("File is null or empty");
+        }
         Image image = gcsService.uploadFile(file, folder);
         Image save = imageRepository.saveAndFlush(image);
         log.info("saved : image {}", save);

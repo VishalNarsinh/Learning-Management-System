@@ -3,7 +3,7 @@ package com.lms.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lms.dto.ChangePasswordRequest;
 import com.lms.dto.CustomMessage;
-import com.lms.dto.RegisterRequest;
+import com.lms.dto.UserUpdateRequest;
 import com.lms.model.Role;
 import com.lms.service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -58,9 +58,14 @@ public class UserController {
 
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@RequestParam("userData") String request, @RequestParam("file") MultipartFile file, Principal principal) throws Exception {
-        RegisterRequest registerRequest = objectMapper.readValue(request, RegisterRequest.class);
-        return ResponseEntity.ok(myUserDetailsService.updateUser(registerRequest,file,principal.getName()));
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest request, Principal principal) throws Exception {
+        return ResponseEntity.ok(myUserDetailsService.updateUser(request,principal.getName()));
+    }
+
+    @PutMapping("/update-image")
+    public ResponseEntity<?> updateUserImage(@RequestParam("file") MultipartFile file, Principal principal) throws Exception {
+        myUserDetailsService.updateUserImage(file,principal.getName());
+        return ResponseEntity.ok(new CustomMessage("Image updated successfully", "success"));
     }
 
     @GetMapping("/profile")

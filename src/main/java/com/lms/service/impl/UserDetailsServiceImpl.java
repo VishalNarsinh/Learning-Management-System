@@ -2,6 +2,7 @@ package com.lms.service.impl;
 
 import com.lms.dto.RegisterRequest;
 import com.lms.dto.UserDto;
+import com.lms.dto.UserUpdateRequest;
 import com.lms.exception.IncorrectPasswordException;
 import com.lms.exception.ResourceNotFoundException;
 import com.lms.exception.SamePasswordException;
@@ -62,21 +63,25 @@ public class UserDetailsServiceImpl implements  MyUserDetailsService {
     }
 
     @Override
-    public UserDto updateUser(RegisterRequest registerRequest, MultipartFile file, String email) throws IOException {
+    public UserDto updateUser(UserUpdateRequest registerRequest, String email) throws IOException {
         User oldUser = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         oldUser.setFirstName(registerRequest.getFirstName());
         oldUser.setLastName(registerRequest.getLastName());
-        if(file != null && !file.isEmpty()) {
-            Image image = oldUser.getImage();
-            oldUser.setImage(null);
-            if (image != null && !AppConstants.DEFAULT_USER_IMAGE_NAME.equals(image.getFileName())) {
-                imageService.deleteImage(image.getImageId());
-            }
-            Image newImage = imageService.uploadImage(file, AppConstants.USER_IMAGE_FOLDER);
-            oldUser.setImage(newImage);
-        }
         User save = userRepository.save(oldUser);
         return UserMapper.toDto(save);
+    }
+
+    @Override
+    public void updateUserImage(MultipartFile file, String email) throws IOException {
+        User oldUser = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        Image image = oldUser.getImage();
+        oldUser.setImage(null);
+        if (image != null && !AppConstants.DEFAULT_USER_IMAGE_NAME.equals(image.getFileName())) {
+            imageService.deleteImage(image.getImageId());
+        }
+        Image newImage = imageService.uploadImage(file, AppConstants.USER_IMAGE_FOLDER);
+        oldUser.setImage(newImage);
+        userRepository.save(oldUser);
     }
 
     @Override
