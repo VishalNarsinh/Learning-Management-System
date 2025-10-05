@@ -70,7 +70,7 @@ public class UserController {
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest, Principal principal){
-        myUserDetailsService.changePassword(changePasswordRequest.getOldPassword(), changePasswordRequest.getNewPassword(), principal.getName());
+        myUserDetailsService.changePassword(principal.getName(), changePasswordRequest.getOldPassword(), changePasswordRequest.getNewPassword());
         return ResponseEntity.ok(new CustomMessage("Password changed successfully", "success"));
     }
 }
