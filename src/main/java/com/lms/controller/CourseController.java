@@ -73,7 +73,9 @@ public class CourseController {
 
     @PatchMapping("/{courseId}/toggle-status")
     public ResponseEntity<?> toggleCourse(@PathVariable Long courseId,Principal principal) {
-        return ResponseEntity.ok(courseService.toggleCourse(courseId,principal.getName()));
+        boolean b = courseService.toggleCourse(courseId, principal.getName());
+        String message = b ? "Course status enabled": "Course status disabled";
+        return ResponseEntity.ok(new CustomMessage(message,"success"));
     }
 
     @GetMapping("/subcategory/{subCategoryId}")

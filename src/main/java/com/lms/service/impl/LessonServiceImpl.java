@@ -105,20 +105,26 @@ public class LessonServiceImpl implements LessonService {
             lesson.setImage(newImage);
             log.info("{}", newImage);
         }
+        videoHelper(videoFile, lesson);
+        lesson.setLessonName(lessonDto.getLessonName());
+        lesson.setLessonContent(lessonDto.getLessonContent());
+        return lessonMapper.toDto(lessonRepository.save(lesson));
+    }
+
+    private void videoHelper(MultipartFile videoFile, Lesson lesson) {
         if (videoFile != null && !videoFile.isEmpty()) {
             Video oldVideo = lesson.getVideo();
             if (oldVideo != null) {
                 lesson.setVideo(null);
+                lessonRepository.save(lesson);
                 videoService.deleteVideo(oldVideo.getVideoId());
             }
             Video newVideo = videoService.saveVideo(videoFile);
             lesson.setVideo(newVideo);
             log.info("{}", newVideo);
         }
-        lesson.setLessonName(lessonDto.getLessonName());
-        lesson.setLessonContent(lessonDto.getLessonContent());
-        return lessonMapper.toDto(lessonRepository.save(lesson));
     }
+
     @Override
     public CompletableFuture<LessonDto> updateLessonAsync(long lessonId, LessonDto lessonDto, MultipartFile imageFile, MultipartFile videoFile, String instructorEmail) throws IOException {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new ResourceNotFoundException("Lesson", "id", lessonId));
@@ -144,6 +150,7 @@ public class LessonServiceImpl implements LessonService {
                 Image oldImage = lesson.getImage();
                 if (oldImage != null) {
                     lesson.setImage(null);
+                    lessonRepository.save(lesson);
                     imageService.deleteImage(oldImage.getImageId());
                 }
                 try {
@@ -155,16 +162,7 @@ public class LessonServiceImpl implements LessonService {
         }, lessonTaskExecutor);
 
         CompletableFuture<Void> videoFuture = CompletableFuture.runAsync(() -> {
-            if (videoFile != null && !videoFile.isEmpty()) {
-                Video oldVideo = lesson.getVideo();
-                if (oldVideo != null) {
-                    lesson.setVideo(null);
-                    videoService.deleteVideo(oldVideo.getVideoId());
-                }
-                Video newVideo = videoService.saveVideo(videoFile);
-                lesson.setVideo(newVideo);
-                log.info("{}", newVideo);
-            }
+            videoHelper(videoFile, lesson);
         }, lessonTaskExecutor);
 
         return imageFuture.thenCombine(videoFuture, (image, video) -> {
@@ -188,6 +186,7 @@ public class LessonServiceImpl implements LessonService {
                 Image oldImage = lesson.getImage();
                 if (oldImage != null) {
                     lesson.setImage(null);
+                    lessonRepository.save(lesson);
                     imageService.deleteImage(oldImage.getImageId());
                 }
                 lesson.setImage( imageService.uploadImage(file, AppConstants.LESSON_IMAGE_FOLDER));
@@ -203,6 +202,7 @@ public class LessonServiceImpl implements LessonService {
             Video oldVideo = lesson.getVideo();
             if (oldVideo != null) {
                 lesson.setVideo(null);
+                lessonRepository.save(lesson);
                 videoService.deleteVideo(oldVideo.getVideoId());
             }
             Video newVideo = videoService.saveVideo(file);
