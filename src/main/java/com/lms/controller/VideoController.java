@@ -60,7 +60,7 @@ public class VideoController {
 
     @GetMapping("/stream/range/{videoId}")
     public ResponseEntity<Resource> getVideoRange(@PathVariable("videoId") long videoId,
-                                           @RequestHeader(name = "range", required = false) String range) throws IOException {
+                                                  @RequestHeader(name = "range", required = false) String range) throws IOException {
         if (range == null || range.isEmpty()) {
             return getVideo(videoId);
         }
@@ -110,9 +110,9 @@ public class VideoController {
 
     @GetMapping("/master/{videoId}/master.m3u8")
     public ResponseEntity<Resource> serveMasterFile(@PathVariable String videoId) {
-        Path masterFilePath = Paths.get(HLS_DIR,videoId, "master.m3u8");
-        if(!Files.exists(masterFilePath)){
-            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Path masterFilePath = Paths.get(HLS_DIR, videoId, "master.m3u8");
+        if (!Files.exists(masterFilePath)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Resource resource = new FileSystemResource(masterFilePath);
         return ResponseEntity
@@ -122,16 +122,17 @@ public class VideoController {
                 )
                 .body(resource);
     }
+
     @GetMapping("/master/{videoId}/{segment}")
     public ResponseEntity<Resource> serveSegments(@PathVariable String videoId, @PathVariable String segment) {
 
-        Path path = Paths.get(HLS_DIR,videoId, segment);
+        Path path = Paths.get(HLS_DIR, videoId, segment);
         log.info(
                 "Path {}",
                 path
         );
-        if(!Files.exists(path)){
-            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (!Files.exists(path)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Resource resource = new FileSystemResource(path);
         return ResponseEntity

@@ -34,7 +34,7 @@ public class JwtUtil {
     @PostConstruct
     public void init() {
         this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
-        System.out.println("JWT Secret initialized");
+//        System.out.println("JWT Secret initialized");
     }
 
     // ✅ Extract username from token

@@ -21,6 +21,15 @@ public interface LessonRepository extends JpaRepository<Lesson,Long> {
     @Query("SELECT COALESCE(MAX(l.sequenceNumber), 0) FROM Lesson l WHERE l.course.courseId = :courseId")
     int getMaxSequenceNumberByCourseId(@Param("courseId") Long courseId);
 
-    List<Lesson> findByCourse_CourseIdAndSequenceNumberBetweenOrderBySequenceNumberAsc(Long courseId, int start, int end);
+
+    @Modifying
+    @Query("UPDATE Lesson l SET l.sequenceNumber = l.sequenceNumber + :delta " +
+            "WHERE l.course.courseId = :courseId AND l.sequenceNumber BETWEEN :start AND :end")
+    void bulkShift(@Param("courseId") Long courseId,
+                   @Param("start") int start,
+                   @Param("end") int end,
+                   @Param("delta") int delta);
+
 
 }
+

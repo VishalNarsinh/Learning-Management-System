@@ -29,13 +29,13 @@ public class GlobalExceptionHandler {
 
         ErrorResponseDto errorResponse = new ErrorResponseDto(
                 request.getDescription(false),
-                HttpStatus.FORBIDDEN,
-                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.UNAUTHORIZED,
+                HttpStatus.UNAUTHORIZED.value(),
                 "You're not authorized to make this request",
                 LocalDateTime.now()
         );
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
@@ -175,6 +175,42 @@ public class GlobalExceptionHandler {
         finalMessage.put("errorDto", errorResponseDto);
         finalMessage.put("fieldErrors", errors);
         return ResponseEntity.badRequest().body(finalMessage);
+    }
+
+    @ExceptionHandler(SamePasswordException.class)
+    public ResponseEntity<?> samePasswordException(SamePasswordException ex, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+    }
+
+    @ExceptionHandler(IncorrectPasswordException.class)
+    public ResponseEntity<?> incorrectPasswordException(IncorrectPasswordException ex, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+    }
+
+    @ExceptionHandler(SamePositionException.class)
+    public ResponseEntity<?> samePositionException(SamePositionException ex, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
     }
 
 }

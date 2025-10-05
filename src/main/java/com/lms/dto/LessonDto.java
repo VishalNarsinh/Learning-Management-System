@@ -18,7 +18,7 @@ public class LessonDto {
     private long lessonId;
     private String lessonName;
     private String lessonContent;
-    private int sequenceNumber;
+    private Integer sequenceNumber;
     private Image image;
     private Video video;
     private Long courseId;

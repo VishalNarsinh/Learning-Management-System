@@ -2,6 +2,7 @@ package com.lms.service.impl;
 
 import com.lms.dto.LessonDto;
 import com.lms.exception.ResourceNotFoundException;
+import com.lms.exception.SamePositionException;
 import com.lms.mapper.LessonMapper;
 import com.lms.model.Image;
 import com.lms.model.Lesson;
@@ -12,6 +13,7 @@ import com.lms.repository.LessonRepository;
 import com.lms.service.ImageService;
 import com.lms.service.LessonService;
 import com.lms.service.VideoService;
+import com.lms.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +49,7 @@ public class LessonServiceImpl implements LessonService {
         int nextSequence = lessonRepository.getMaxSequenceNumberByCourseId(lessonDto.getCourseId()) + 1;
         entity.setSequenceNumber(nextSequence);
         if (imageFile != null && !imageFile.isEmpty()) {
-            Image image = imageService.uploadImage(imageFile, "lesson");
+            Image image = imageService.uploadImage(imageFile, AppConstants.LESSON_IMAGE_FOLDER);
             log.info("Image Id : {}", image.getImageId());
             entity.setImage(image);
         }
@@ -70,7 +72,7 @@ public class LessonServiceImpl implements LessonService {
         entity.setSequenceNumber(nextSequence);
         CompletableFuture<Image> imageFuture = (imageFile != null && !imageFile.isEmpty()) ? CompletableFuture.supplyAsync(() -> {
             try {
-                return imageService.uploadImage(imageFile, "lesson");
+                return imageService.uploadImage(imageFile, AppConstants.LESSON_IMAGE_FOLDER);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -99,7 +101,7 @@ public class LessonServiceImpl implements LessonService {
                 lesson.setImage(null);
                 imageService.deleteImage(oldImage.getImageId());
             }
-            Image newImage = imageService.uploadImage(imageFile, "lesson");
+            Image newImage = imageService.uploadImage(imageFile, AppConstants.LESSON_IMAGE_FOLDER);
             lesson.setImage(newImage);
             log.info("{}", newImage);
         }
@@ -145,7 +147,7 @@ public class LessonServiceImpl implements LessonService {
                     imageService.deleteImage(oldImage.getImageId());
                 }
                 try {
-                    lesson.setImage( imageService.uploadImage(imageFile, "lesson"));
+                    lesson.setImage( imageService.uploadImage(imageFile, AppConstants.LESSON_IMAGE_FOLDER));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -188,7 +190,7 @@ public class LessonServiceImpl implements LessonService {
                     lesson.setImage(null);
                     imageService.deleteImage(oldImage.getImageId());
                 }
-                lesson.setImage( imageService.uploadImage(file, "lesson"));
+                lesson.setImage( imageService.uploadImage(file, AppConstants.LESSON_IMAGE_FOLDER));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -232,46 +234,38 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public List<LessonDto> findLessonsByCourseId(long courseId) {
-        return lessonRepository.findByCourseCourseIdOrderBySequenceNumber(courseId).stream().map(lessonMapper::toDto).toList();
+        List<LessonDto> list = lessonRepository.findByCourseCourseIdOrderBySequenceNumber(courseId).stream().map(lessonMapper::toDto).toList();
+        if(list.isEmpty()) throw new ResourceNotFoundException("Lesson", "courseId", courseId);
+        return list;
     }
 
-    @Override
-    public void updateLessonSequence(Long courseId, Long lessonId, int newPosition) {
-        Lesson lessonToMove = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new ResourceNotFoundException("Lesson", "id", lessonId));
-        if (!lessonToMove.getCourse().getCourseId().equals(courseId))
-            throw new IllegalArgumentException("Lesson does not belong to the specified course");
 
-        int currentPosition = lessonToMove.getSequenceNumber();
+   @Override
+   @Transactional
+   public void updateLessonSequence(Long courseId, Long lessonId, int newPosition) {
+       Lesson lessonToMove = lessonRepository.findById(lessonId)
+               .orElseThrow(() -> new ResourceNotFoundException("Lesson", "id", lessonId));
 
-        if (newPosition == currentPosition) return;
+       int currentPosition = lessonToMove.getSequenceNumber();
+       if (newPosition == currentPosition) {
+           throw new SamePositionException("Lesson is already at this position");
+       }
 
-        // Shift other lessons
-        if (newPosition < currentPosition) {
-            // Move others down: e.g., 2 → 3, 3 → 4, etc.
-            List<Lesson> toShiftDown = lessonRepository.findByCourse_CourseIdAndSequenceNumberBetweenOrderBySequenceNumberAsc(
-                    courseId, newPosition, currentPosition - 1);
+       // Step 1: Temporarily nullify the moving lesson
+       lessonToMove.setSequenceNumber(null);
+       lessonRepository.save(lessonToMove);
 
-            for (Lesson l : toShiftDown) {
-                l.setSequenceNumber(l.getSequenceNumber() + 1);
-            }
+       // Step 2: Shift other lessons
+       if (newPosition < currentPosition) {
+           lessonRepository.bulkShift(courseId, newPosition, currentPosition - 1, 1); // shift down
+       } else {
+           lessonRepository.bulkShift(courseId, currentPosition + 1, newPosition, -1); // shift up
+       }
 
-            lessonRepository.saveAll(toShiftDown);
-        } else {
-            // Move others up: e.g., 6 → 5, 5 → 4, etc.
-            List<Lesson> toShiftUp = lessonRepository.findByCourse_CourseIdAndSequenceNumberBetweenOrderBySequenceNumberAsc(
-                    courseId, currentPosition + 1, newPosition);
+       // Step 3: Move the lesson to the new position
+       lessonToMove.setSequenceNumber(newPosition);
+       lessonRepository.save(lessonToMove);
+   }
 
-            for (Lesson l : toShiftUp) {
-                l.setSequenceNumber(l.getSequenceNumber() - 1);
-            }
-
-            lessonRepository.saveAll(toShiftUp);
-        }
-
-        // Update the target lesson
-        lessonToMove.setSequenceNumber(newPosition);
-        lessonRepository.save(lessonToMove);
-    }
 
 }

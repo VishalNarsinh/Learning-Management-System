@@ -2,7 +2,9 @@ package com.lms.service.impl;
 
 import com.lms.dto.RegisterRequest;
 import com.lms.dto.UserDto;
+import com.lms.exception.IncorrectPasswordException;
 import com.lms.exception.ResourceNotFoundException;
+import com.lms.exception.SamePasswordException;
 import com.lms.mapper.UserMapper;
 import com.lms.model.Image;
 import com.lms.model.Role;
@@ -40,6 +42,12 @@ public class UserDetailsServiceImpl implements  MyUserDetailsService {
         return userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("Invalid email or password"));
     }
 
+    @Override
+    public UserDto findUserByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        return UserMapper.toDto(user);
+    }
+
 
     @Override
     public UserDto saveUser(RegisterRequest registerRequest){
@@ -64,7 +72,7 @@ public class UserDetailsServiceImpl implements  MyUserDetailsService {
             if (image != null && !AppConstants.DEFAULT_USER_IMAGE_NAME.equals(image.getFileName())) {
                 imageService.deleteImage(image.getImageId());
             }
-            Image newImage = imageService.uploadImage(file, "user");
+            Image newImage = imageService.uploadImage(file, AppConstants.USER_IMAGE_FOLDER);
             oldUser.setImage(newImage);
         }
         User save = userRepository.save(oldUser);
@@ -81,6 +89,19 @@ public class UserDetailsServiceImpl implements  MyUserDetailsService {
         if (image != null && !AppConstants.DEFAULT_USER_IMAGE_NAME.equals(image.getFileName())) {
             imageService.deleteImage(image.getImageId());
         }
+    }
+
+    @Override
+    public void changePassword(String email, String oldPassword, String newPassword){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        if(!bcryptPasswordEncoder.matches(oldPassword, user.getPassword())){
+            throw new IncorrectPasswordException("You have entered incorrect old password");
+        }
+        if(oldPassword.equals(newPassword)){
+            throw new SamePasswordException("New password cannot be same as old password");
+        }
+        user.setPassword(bcryptPasswordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     @Override

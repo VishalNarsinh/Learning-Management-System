@@ -11,11 +11,15 @@ import java.util.List;
 
 public interface MyUserDetailsService extends UserDetailsService {
 
+    UserDto findUserByEmail(String email);
+
     UserDto saveUser(RegisterRequest registerRequest);
 
     UserDto updateUser(RegisterRequest registerRequest, MultipartFile file,String email) throws IOException;
 
     void deleteUser(long userId);
+
+    void changePassword(String email, String oldPassword, String newPassword);
 
     List<UserDto> findAllUsers();
 

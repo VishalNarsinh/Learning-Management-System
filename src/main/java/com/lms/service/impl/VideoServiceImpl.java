@@ -6,11 +6,9 @@ import com.lms.model.Lesson;
 import com.lms.model.Video;
 import com.lms.repository.LessonRepository;
 import com.lms.repository.VideoRepository;
-import com.lms.service.FileService;
 import com.lms.service.VideoService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +29,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VideoServiceImpl implements VideoService {
 
-    private final FileService fileService;
     @Value("${files.video}")
     private String DIR;
 
@@ -51,7 +48,6 @@ public class VideoServiceImpl implements VideoService {
 
     private static final Logger log = LoggerFactory.getLogger(VideoServiceImpl.class);
     private final LessonRepository lessonRepository;
-    private final ModelMapper modelMapper;
     private final VideoRepository videoRepository;
 
 
@@ -160,7 +156,7 @@ public class VideoServiceImpl implements VideoService {
                 deleteVideo(videoId);
             } else {
                 // Mark as failed in the database, so you can retry later.
-                video.setProcessingStatus("FAILED"); // Ensure this column exists
+                video.setProcessingStatus("FAILED");
                 videoRepository.save(video);
             }
             throw new RuntimeException("Error while processing video", e);

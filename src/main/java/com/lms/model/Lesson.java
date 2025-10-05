@@ -26,8 +26,8 @@ public class Lesson {
 
     private String lessonContent;
 
-    @Column(name = "sequence_number", nullable = false)
-    private int sequenceNumber;
+    @Column(name = "sequence_number", nullable = true)
+    private Integer sequenceNumber;
 
 
     @OneToOne
