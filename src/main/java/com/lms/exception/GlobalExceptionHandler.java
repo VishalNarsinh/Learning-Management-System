@@ -4,8 +4,11 @@ package com.lms.exception;
 import com.lms.dto.ErrorResponseDto;
 import org.apache.coyote.BadRequestException;
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.DisabledException;
@@ -25,6 +28,8 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
@@ -231,8 +236,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<?> badRequestException(BadRequestException ex, WebRequest webRequest) {
+        String description = webRequest.getDescription(false);
+        if (description.contains("/stream/")) {
+            log.error("Error occurred during video streaming: {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .build();
+        }
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                webRequest.getDescription(false),
+                description,
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
