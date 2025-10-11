@@ -1,8 +1,10 @@
 package com.lms.controller;
 
+import com.lms.dto.ErrorResponseDto;
 import com.lms.model.Video;
 import com.lms.service.VideoService;
 import com.lms.utils.AppConstants;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/videos")
@@ -59,14 +62,14 @@ public class VideoController {
     }
 
     @GetMapping("/stream/range/{videoId}")
-    public ResponseEntity<Resource> getVideoRange(@PathVariable("videoId") long videoId,
-                                                  @RequestHeader(name = "range", required = false) String range) throws IOException {
+    public ResponseEntity<?> getVideoRange(@PathVariable("videoId") long videoId,
+                                           @RequestHeader(name = "range", required = false) String range, HttpServletRequest request) throws IOException {
         if (range == null || range.isEmpty()) {
             return getVideo(videoId);
         }
         Video video = videoService.getVideoByVideoId(videoId);
         Path path = Paths.get(video.getVideoUrl());
-        Resource resource = new FileSystemResource(video.getVideoUrl());
+//        Resource resource = new FileSystemResource(video.getVideoUrl());
         String contentType = video.getContentType();
         if (contentType == null || contentType.isEmpty()) {
             contentType = "application/octet-stream";
@@ -87,7 +90,6 @@ public class VideoController {
             long contentLength = rangeEnd - rangeStart + 1;
             log.info("rangeStart {} rangeEnd {} fileLength {} contentLength {}", rangeStart, rangeEnd, fileLength, contentLength);
 
-
             byte[] data = new byte[(int) contentLength];
             int read = inputStream.read(data, 0, data.length);
             log.info("read number of bytes{}", read);
@@ -104,9 +106,25 @@ public class VideoController {
                     .contentType(MediaType.parseMediaType(contentType))
                     .body(new ByteArrayResource(data));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
+            return buildErrorResponse(request, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+    public static ResponseEntity<ErrorResponseDto> buildErrorResponse(
+            HttpServletRequest request, HttpStatus status, String message) {
+
+        return ResponseEntity.status(status)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ErrorResponseDto(
+                        request.getRequestURI(),
+                        status,
+                        status.value(),
+                        message,
+                        LocalDateTime.now()
+                ));
+    }
+
 
     @GetMapping("/master/{videoId}/master.m3u8")
     public ResponseEntity<Resource> serveMasterFile(@PathVariable String videoId) {
