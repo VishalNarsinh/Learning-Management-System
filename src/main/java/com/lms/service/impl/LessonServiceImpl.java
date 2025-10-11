@@ -237,7 +237,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public List<LessonDto> findLessonsByCourseId(long courseId) {
-        List<LessonDto> list = lessonRepository.findByCourse_CourseIdOrderByLessonNameAsc(courseId).stream().map(lessonMapper::toDto).toList();
+        List<LessonDto> list = lessonRepository.findByCourseCourseIdOrderBySequenceNumber(courseId).stream().map(lessonMapper::toDto).toList();
         if(list.isEmpty()) throw new ResourceNotFoundException("Lesson", "courseId", courseId);
         return list;
     }
