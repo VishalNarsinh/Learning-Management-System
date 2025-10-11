@@ -32,4 +32,6 @@ public interface LessonService {
     List<LessonDto> findLessonsByCourseId(long courseId);
 
     void updateLessonSequence(Long courseId, Long lessonId, int newPosition);
+
+    void bulkUploadLessons(List<LessonDto> lessonDtos);
 }

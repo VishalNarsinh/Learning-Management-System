@@ -16,6 +16,8 @@ public interface LessonRepository extends JpaRepository<Lesson,Long> {
     List<Lesson> findByCourseCourseId(Long courseId);
     List<Lesson> findByCourseCourseIdOrderBySequenceNumber(Long courseId);
 
+    List<Lesson> findByCourse_CourseIdOrderByLessonNameAsc(Long courseId);
+
     long countByCourse_CourseId(long courseCourseId);
 
     @Query("SELECT COALESCE(MAX(l.sequenceNumber), 0) FROM Lesson l WHERE l.course.courseId = :courseId")

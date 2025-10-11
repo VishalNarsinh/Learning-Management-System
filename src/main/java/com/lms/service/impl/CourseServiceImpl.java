@@ -45,9 +45,11 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseMapper.toEntity(courseDto);
         course.setSubCategory(subCategory);
         course.setEnabled(true);
-        Image image = imageService.uploadImage(file, AppConstants.COURSE_IMAGE_FOLDER);
-        log.info("image {}", image);
-        course.setImage(image);
+        if(file!=null && !file.isEmpty()){
+            Image image = imageService.uploadImage(file, AppConstants.COURSE_IMAGE_FOLDER);
+            log.info("image {}", image);
+            course.setImage(image);
+        }
         User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         course.setInstructor(user);
         return courseMapper.toDto(courseRepository.save(course));
@@ -158,6 +160,7 @@ public class CourseServiceImpl implements CourseService {
             return dto;
         }).toList();
     }
+
 
 
 }

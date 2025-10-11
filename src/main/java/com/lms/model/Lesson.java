@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "lessons",uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"course_id","sequence_number"})
+       /* @UniqueConstraint(columnNames = {"course_id","sequence_number"})*/
 })
 @Getter
 @Setter

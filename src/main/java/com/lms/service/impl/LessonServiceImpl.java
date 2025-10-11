@@ -4,6 +4,7 @@ import com.lms.dto.LessonDto;
 import com.lms.exception.ResourceNotFoundException;
 import com.lms.exception.SamePositionException;
 import com.lms.mapper.LessonMapper;
+import com.lms.model.Course;
 import com.lms.model.Image;
 import com.lms.model.Lesson;
 import com.lms.model.Video;
@@ -216,12 +217,14 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public void deleteLesson(long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new ResourceNotFoundException("Lesson", "id", lessonId));
-        long imageId = lesson.getImage().getImageId();
-        long videoId = lesson.getVideo().getVideoId();
+        Long imageId = (lesson.getImage()!=null)?lesson.getImage().getImageId():null;
+        Long videoId = (lesson.getVideo()!=null) ?lesson.getVideo().getVideoId():null;
         lesson.setImage(null);
         lesson.setVideo(null);
-        imageService.deleteImage(imageId);
-        videoService.deleteVideo(videoId);
+        if(imageId!=null)
+            imageService.deleteImage(imageId);
+        if(videoId!=null)
+            videoService.deleteVideo(videoId);
 //        lessonRepository.saveAndFlush(lesson);
         lessonProgressRepository.deleteLessonProgressesByLesson_LessonId(lessonId);
         lessonRepository.delete(lesson);
@@ -234,7 +237,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public List<LessonDto> findLessonsByCourseId(long courseId) {
-        List<LessonDto> list = lessonRepository.findByCourseCourseIdOrderBySequenceNumber(courseId).stream().map(lessonMapper::toDto).toList();
+        List<LessonDto> list = lessonRepository.findByCourse_CourseIdOrderByLessonNameAsc(courseId).stream().map(lessonMapper::toDto).toList();
         if(list.isEmpty()) throw new ResourceNotFoundException("Lesson", "courseId", courseId);
         return list;
     }
@@ -257,6 +260,7 @@ public class LessonServiceImpl implements LessonService {
 
        // Step 2: Shift other lessons
        if (newPosition < currentPosition) {
+           
            lessonRepository.bulkShift(courseId, newPosition, currentPosition - 1, 1); // shift down
        } else {
            lessonRepository.bulkShift(courseId, currentPosition + 1, newPosition, -1); // shift up
@@ -266,6 +270,19 @@ public class LessonServiceImpl implements LessonService {
        lessonToMove.setSequenceNumber(newPosition);
        lessonRepository.save(lessonToMove);
    }
+
+    @Override
+    public void bulkUploadLessons(List<LessonDto> lessonDtos) {
+        Long courseId = lessonDtos.get(0).getCourseId();
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", "id", courseId));
+        List<Lesson> list = lessonDtos.stream().map(dto -> {
+            Lesson lesson = lessonMapper.toEntity(dto);
+            lesson.setCourse(course);
+            lesson.setSequenceNumber(lessonRepository.getMaxSequenceNumberByCourseId(courseId) + 1);
+            lessonRepository.save(lesson);
+            return lesson;
+        }).toList();
+    }
 
 
 }

@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -82,5 +83,11 @@ public class LessonController {
     @GetMapping("/course/{courseId}")
     public ResponseEntity<?> getLessonsByCourseId(@PathVariable long courseId) {
         return ResponseEntity.ok(lessonService.findLessonsByCourseId(courseId));
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<?> bulkUploadLessons(@RequestBody List<LessonDto> lessonDtos) {
+        lessonService.bulkUploadLessons(lessonDtos);
+        return ResponseEntity.ok(CustomMessage.builder().message("Lessons uploaded successfully").status("success").build());
     }
 }
