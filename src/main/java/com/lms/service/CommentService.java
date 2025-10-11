@@ -1,14 +1,16 @@
 package com.lms.service;
 
-import com.lms.dto.LessonDto;
-import com.lms.model.Comment;
+import com.lms.dto.CommentDto;
+import com.lms.dto.CommentRequest;
 
 import java.util.List;
 
 public interface CommentService {
-    List<Comment> findCommentsByLessonId(LessonDto lessonDto);
+    List<CommentDto> findCommentsByLessonId(Long lessongId);
 
-    Comment saveComment(Comment comment);
+    CommentDto saveComment(CommentRequest commentRequest,String email);
 
     void deleteComment(long commentId);
+
+    CommentDto findCommentById(Long commentId);
 }
